@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -12,6 +11,10 @@ app.use(bodyParser.json());
 
 const lastLocations = {};
 
+app.get('/', (req, res) => {
+  res.send('✅ Location Tracker Server running on Heroku!');
+});
+
 app.post('/api/updateLocation', (req, res) => {
   const { userId, lat, lon, timestamp, accuracy } = req.body;
   if (!userId || !lat || !lon) return res.status(400).json({ error: 'missing fields' });
@@ -23,14 +26,12 @@ app.post('/api/updateLocation', (req, res) => {
 
 io.on('connection', socket => {
   console.log('Client connected:', socket.id);
-
   socket.on('subscribe', userId => {
     socket.join(userId);
     if (lastLocations[userId]) socket.emit('locationUpdate', lastLocations[userId]);
   });
-
   socket.on('unsubscribe', userId => socket.leave(userId));
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on ${PORT}`));
